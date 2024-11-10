@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using BerberKuaforRandevu.Genel;
 
 namespace BerberKuaforRandevu.Areas.Identity.Pages.Account
 {
@@ -59,44 +60,34 @@ namespace BerberKuaforRandevu.Areas.Identity.Pages.Account
         /// </summary>
         public string ReturnUrl { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
+            [Display(Name = "E-Posta")]
             public string Email { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, 
+                ErrorMessage = "{0} en az {2} karakter, en fazla {1} karakter uzunluğunda olmalı.", 
+                MinimumLength = 3)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Şifre")]
             public string Password { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+            [Required]
+            [Display(Name = "Ad")]
+            public string Ad {  get; set; }
+
+            [Required]
+            [Display(Name = "Soyad")]
+            public string Soyad { get; set; }
+
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Şifreyi Onayla")]
+            [Compare("Password", ErrorMessage = "Şifre ve onay şifresi eşleşmiyor.")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -115,6 +106,8 @@ namespace BerberKuaforRandevu.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
+                user.Ad = Input.Ad;
+                user.Soyad = Input.Soyad;
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -122,6 +115,8 @@ namespace BerberKuaforRandevu.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    await _userManager.AddToRoleAsync(user, Roller.Musteri);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

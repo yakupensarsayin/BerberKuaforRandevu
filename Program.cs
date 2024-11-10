@@ -1,3 +1,4 @@
+using BerberKuaforRandevu.Genel;
 using BerberKuaforRandevu.Models;
 using BerberKuaforRandevu.Veritabani;
 using Microsoft.AspNetCore.Identity;
@@ -54,7 +55,7 @@ using (var scope = app.Services.CreateScope())
     var rolYoneticisi = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var kullaniciYoneticisi = scope.ServiceProvider.GetRequiredService<UserManager<Kullanici>>();
 
-    string[] roller = { "Admin", "Kuafor", "Musteri" };
+    string[] roller = ["Admin", "Kuafor", "Musteri"];
     foreach (string rol in roller)
     {
         if (!await rolYoneticisi.RoleExistsAsync(rol))
@@ -63,7 +64,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    string[] emailler = { "yakup.sayin@ogr.sakarya.edu.tr", "sude.kocaacar@ogr.sakarya.edu.tr" };
+    string[] emailler = ["yakup.sayin@ogr.sakarya.edu.tr", "sude.kocaacar@ogr.sakarya.edu.tr"];
     foreach (string email in emailler)
     {
         if (await kullaniciYoneticisi.FindByEmailAsync(email) == null)
@@ -78,7 +79,7 @@ using (var scope = app.Services.CreateScope())
 
             string sifre = "sau";
             await kullaniciYoneticisi.CreateAsync(kullanici, sifre);
-            await kullaniciYoneticisi.AddToRoleAsync(kullanici, "Admin");
+            await kullaniciYoneticisi.AddToRoleAsync(kullanici, Roller.Admin);
         }
     }
 }
