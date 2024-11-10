@@ -4,6 +4,7 @@ using BerberKuaforRandevu.Veritabani;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BerberKuaforRandevu.Migrations
 {
     [DbContext(typeof(KuaforVeritabani))]
-    partial class KuaforVeritabaniModelSnapshot : ModelSnapshot
+    [Migration("20241221185416_Kullanici_Ad_Soyad_Bugfix")]
+    partial class Kullanici_Ad_Soyad_Bugfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
