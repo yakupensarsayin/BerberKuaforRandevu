@@ -50,11 +50,12 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-#region Varsayilan rolleri ve admin kullanicilarini olusturalim.
+#region Varsayilan rolleri ve admin kullanicilarini, salon turlerini ve salonlari olusturalim.
 using (var scope = app.Services.CreateScope())
 {
     var rolYoneticisi = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var kullaniciYoneticisi = scope.ServiceProvider.GetRequiredService<UserManager<Kullanici>>();
+    var context = scope.ServiceProvider.GetRequiredService<KuaforVeritabani>();
 
     string[] roller = [Roller.Admin, Roller.Kuafor, Roller.Musteri];
     foreach (string rol in roller)
@@ -84,6 +85,46 @@ using (var scope = app.Services.CreateScope())
             string sifre = "sau";
             await kullaniciYoneticisi.CreateAsync(kullanici, sifre);
             await kullaniciYoneticisi.AddToRoleAsync(kullanici, Roller.Admin);
+        }
+    }
+
+    string[] salonTurleri = ["Berber", "Kuaför"];
+    foreach (string tur in salonTurleri)
+    {
+        if (!await context.SalonTurleri.AnyAsync(st => st.Ad == tur))
+        {
+            var yeniTur = new SalonTuru
+            {
+                Ad = tur
+            };
+            context.Add(yeniTur);
+            await context.SaveChangesAsync();
+        }
+    }
+
+    string[] salonlar = ["Sakarya Erkek Kuaförü", "Sakarya Güzellik Merkezi"];
+    for (int i = 0; i < salonlar.Length; i++)
+    {
+        if (!await context.Salonlar.AnyAsync(s => s.Ad == salonlar[i]))
+        {
+            Kullanici? kullanici = await context.Kullanicilar
+                .FirstOrDefaultAsync(k => k.Email == emailler[i]);
+
+            SalonTuru? tur = await context.SalonTurleri
+                .FirstOrDefaultAsync(st => st.Ad == salonTurleri[i]);
+
+            if (kullanici != null && tur != null)
+            {
+                var salon = new Salon
+                {
+                    Ad = salonlar[i],
+                    AdminId = kullanici.Id,
+                    SalonTuruId = tur.Id
+                };
+
+                context.Salonlar.Add(salon);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
