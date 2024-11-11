@@ -11,6 +11,8 @@ namespace BerberKuaforRandevu.Veritabani
         public DbSet<Yetenek> Yetenekler { get; set; }
         public DbSet<KuaforYetenek> KuaforlerYetenekler { get; set; }
         public DbSet<KuaforUzmanlik> KuaforlerUzmanliklar { get; set; }
+        public DbSet<Salon> Salonlar { get; set; }
+        public DbSet<SalonTuru> SalonTurleri { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         { 
@@ -25,6 +27,7 @@ namespace BerberKuaforRandevu.Veritabani
                 .HasKey(ku => new { ku.KuaforId, ku.YetenekId }); 
             
             modelBuilder.Entity<KuaforYetenek>()
-                .HasKey(ky => new { ky.KuaforId, ky.YetenekId }); }
+                .HasKey(ky => new { ky.KuaforId, ky.YetenekId });
+        }
     }
 }
