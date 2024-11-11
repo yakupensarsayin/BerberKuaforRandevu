@@ -3,6 +3,7 @@ using BerberKuaforRandevu.Models;
 using BerberKuaforRandevu.Veritabani;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +56,7 @@ using (var scope = app.Services.CreateScope())
     var rolYoneticisi = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var kullaniciYoneticisi = scope.ServiceProvider.GetRequiredService<UserManager<Kullanici>>();
 
-    string[] roller = ["Admin", "Kuafor", "Musteri"];
+    string[] roller = [Roller.Admin, Roller.Kuafor, Roller.Musteri];
     foreach (string rol in roller)
     {
         if (!await rolYoneticisi.RoleExistsAsync(rol))
@@ -69,12 +70,15 @@ using (var scope = app.Services.CreateScope())
     {
         if (await kullaniciYoneticisi.FindByEmailAsync(email) == null)
         {
+            string ad = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(email.Split('@')[0].Split('.')[0]);
+            string soyad = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(email.Split('@')[0].Split('.')[1]);
+
             var kullanici = new Kullanici
             {
                 Email = email,
                 UserName = email,
-                Ad = email.StartsWith("ya") ? "Yakup" : "Sude",
-                Soyad = email.StartsWith("ya") ? "Sayin" : "Kocaacar",
+                Ad = ad,
+                Soyad = soyad
             };
 
             string sifre = "sau";
