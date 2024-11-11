@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BerberKuaforRandevu.Migrations
 {
     [DbContext(typeof(KuaforVeritabani))]
-    [Migration("20241221185416_Kullanici_Ad_Soyad_Bugfix")]
-    partial class Kullanici_Ad_Soyad_Bugfix
+    [Migration("20241221210150_Kuafor_Yetenek_Uzmanlik_Siniflarini_Ekle")]
+    partial class Kuafor_Yetenek_Uzmanlik_Siniflarini_Ekle
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,55 @@ namespace BerberKuaforRandevu.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.Kuafor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("KullaniciId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KullaniciId");
+
+                    b.ToTable("Kuaforler");
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.KuaforUzmanlik", b =>
+                {
+                    b.Property<int>("KuaforId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("YetenekId")
+                        .HasColumnType("int");
+
+                    b.HasKey("KuaforId", "YetenekId");
+
+                    b.HasIndex("YetenekId");
+
+                    b.ToTable("KuaforlerUzmanliklar");
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.KuaforYetenek", b =>
+                {
+                    b.Property<int>("KuaforId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("YetenekId")
+                        .HasColumnType("int");
+
+                    b.HasKey("KuaforId", "YetenekId");
+
+                    b.HasIndex("YetenekId");
+
+                    b.ToTable("KuaforlerYetenekler");
+                });
 
             modelBuilder.Entity("BerberKuaforRandevu.Models.Kullanici", b =>
                 {
@@ -98,6 +147,24 @@ namespace BerberKuaforRandevu.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.Yetenek", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Yetenekler");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -237,6 +304,55 @@ namespace BerberKuaforRandevu.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BerberKuaforRandevu.Models.Kuafor", b =>
+                {
+                    b.HasOne("BerberKuaforRandevu.Models.Kullanici", "Kullanici")
+                        .WithMany()
+                        .HasForeignKey("KullaniciId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kullanici");
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.KuaforUzmanlik", b =>
+                {
+                    b.HasOne("BerberKuaforRandevu.Models.Kuafor", "Kuafor")
+                        .WithMany("KuaforUzmanliklar")
+                        .HasForeignKey("KuaforId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BerberKuaforRandevu.Models.Yetenek", "Yetenek")
+                        .WithMany("KuaforUzmanliklar")
+                        .HasForeignKey("YetenekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kuafor");
+
+                    b.Navigation("Yetenek");
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.KuaforYetenek", b =>
+                {
+                    b.HasOne("BerberKuaforRandevu.Models.Kuafor", "Kuafor")
+                        .WithMany("KuaforYetenekler")
+                        .HasForeignKey("KuaforId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BerberKuaforRandevu.Models.Yetenek", "Yetenek")
+                        .WithMany("KuaforYetenekler")
+                        .HasForeignKey("YetenekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kuafor");
+
+                    b.Navigation("Yetenek");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -286,6 +402,20 @@ namespace BerberKuaforRandevu.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.Kuafor", b =>
+                {
+                    b.Navigation("KuaforUzmanliklar");
+
+                    b.Navigation("KuaforYetenekler");
+                });
+
+            modelBuilder.Entity("BerberKuaforRandevu.Models.Yetenek", b =>
+                {
+                    b.Navigation("KuaforUzmanliklar");
+
+                    b.Navigation("KuaforYetenekler");
                 });
 #pragma warning restore 612, 618
         }
