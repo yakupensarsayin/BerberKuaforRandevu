@@ -2,6 +2,7 @@
 using BerberKuaforRandevu.Genel;
 using BerberKuaforRandevu.Models;
 using BerberKuaforRandevu.Veritabani;
+using BerberKuaforRandevu.Yardimci;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,29 +11,17 @@ using Microsoft.EntityFrameworkCore;
 namespace BerberKuaforRandevu.Controllers
 {
     [Authorize(Roles = Roller.Admin)]
-    public class KuaforController(KuaforVeritabani context, UserManager<Kullanici> userManager) : Controller
+    public class KuaforController(KuaforVeritabani context, UserManager<Kullanici> userManager,
+            KuaforHelper helper) : Controller
     {
         private readonly KuaforVeritabani _context = context;
         private readonly UserManager<Kullanici> _userManager = userManager;
+        private readonly KuaforHelper _helper = helper;
+
         public async Task<IActionResult> Index()
         {
-            if (User?.Identity?.Name == null) { return Unauthorized("Kullanıcı kimliği bulunamadı."); }
-
-            string userEmail = User.Identity.Name;
-
-            string? adminId = await GetAdminIdAsync(userEmail); 
-
-            if (adminId == null) { return Unauthorized("Admin kullanıcı bulunamadı."); }
-
-            Salon? salon = await GetAdminSalonAsync(adminId);
-
-            if (salon == null)
-            {
-                TempData["Hata"] = "Adminin sorumlu olduğu salon bulunamadı.";
-                return View("Hata");
-            }
-
-            List<Kuafor> kuaforler = await GetKuaforlerBySalonIdAsync(salon.Id);
+            int salonId = await _helper.GetSalonIdForAdminAsync();
+            List<Kuafor> kuaforler = await GetKuaforlerBySalonIdAsync(salonId);
             return View(kuaforler);
         }
 
@@ -42,30 +31,15 @@ namespace BerberKuaforRandevu.Controllers
             return View();
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Olustur(KuaforOlusturDto dto)
         {
-            if (User?.Identity?.Name == null) { return Unauthorized("Kullanıcı kimliği bulunamadı."); }
-
-            string userEmail = User.Identity.Name;
-
-            string? adminId = await GetAdminIdAsync(userEmail);
-
-            if (adminId == null) { return Unauthorized("Admin kullanıcı bulunamadı."); }
-
-            Salon? salon = await GetAdminSalonAsync(adminId);
-
-            if (salon == null)
-            {
-                TempData["Hata"] = "Adminin sorumlu olduğu salon bulunamadı.";
-                return View("Hata");
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(dto);
             }
+
+            int salonId = await _helper.GetSalonIdForAdminAsync();
 
             var kullanici = new Kullanici
             {
@@ -93,7 +67,7 @@ namespace BerberKuaforRandevu.Controllers
             var kuafor = new Kuafor
             {
                 KullaniciId = kullanici.Id,
-                SalonId = salon.Id
+                SalonId = salonId
             };
 
             _context.Kuaforler.Add(kuafor);
@@ -101,20 +75,7 @@ namespace BerberKuaforRandevu.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-        private async Task<string?> GetAdminIdAsync(string email)
-        {
-            var admin = await _context.Kullanicilar
-                .FirstOrDefaultAsync(k => k.Email == email);
-            return admin?.Id;
-        }
-
-        private async Task<Salon?> GetAdminSalonAsync(string adminId)
-        {
-            return await _context.Salonlar
-                .FirstOrDefaultAsync(s => s.AdminId == adminId);
-        }
-
+ 
         private async Task<List<Kuafor>> GetKuaforlerBySalonIdAsync(int salonId)
         {
             return await _context.Kuaforler
@@ -126,7 +87,5 @@ namespace BerberKuaforRandevu.Controllers
                     .ThenInclude(ku => ku.Yetenek)
                 .ToListAsync();
         }
-
-
     }
 }
