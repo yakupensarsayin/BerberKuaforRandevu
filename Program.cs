@@ -1,6 +1,7 @@
 using BerberKuaforRandevu.Genel;
 using BerberKuaforRandevu.Models;
 using BerberKuaforRandevu.Veritabani;
+using BerberKuaforRandevu.Yardimci;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -25,6 +26,8 @@ builder.Services.AddDefaultIdentity<Kullanici>(o =>
     .AddEntityFrameworkStores<KuaforVeritabani>()
     .AddDefaultUI();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<KuaforHelper>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
