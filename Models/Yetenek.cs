@@ -10,6 +10,10 @@ namespace BerberKuaforRandevu.Models
         [StringLength(50)]
         public string Ad { get; set; } = string.Empty;
 
+        [Required]
+        public int SalonId { get; set; }
+        public Salon Salon { get; set; } = null!;
+
         public List<KuaforYetenek> KuaforYetenekler { get; set; } = [];
         public List<KuaforUzmanlik> KuaforUzmanliklar { get; set; } = [];
     }
