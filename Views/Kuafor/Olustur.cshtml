@@ -1,0 +1,55 @@
+﻿@using BerberKuaforRandevu.Dto.Kuafor
+@model KuaforOlusturDto
+
+@{
+    ViewBag.Title = "Kuaför Oluştur";
+}
+
+<h2>Yeni Kuaför Oluştur</h2>
+<hr />
+
+<form asp-action="Olustur">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Ad" class="control-label"></label>
+                <input asp-for="Ad" class="form-control" />
+                <span asp-validation-for="Ad" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Soyad" class="control-label"></label>
+                <input asp-for="Soyad" class="form-control" />
+                <span asp-validation-for="Soyad" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Sifre" class="control-label"></label>
+                <input asp-for="Sifre" type="password" class="form-control" />
+                <span asp-validation-for="Sifre" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Oluştur" class="btn btn-primary mt-3" />
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
