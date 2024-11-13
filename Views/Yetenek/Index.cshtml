@@ -7,6 +7,19 @@
 <h2>@ViewData["Title"]</h2>
 <hr />
 
+@if (TempData["Mesaj"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["Mesaj"]
+    </div>
+}
+else if (TempData["Hata"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["Hata"]
+    </div>
+}
+
 <a asp-action="Olustur" class="btn btn-primary mb-3">Yeni Yetenek Oluştur</a>
 
 <div class="table-responsive">
@@ -14,8 +27,8 @@
         <thead>
             <tr>
                 <th>Ad</th>
-                <th>Süre</th>
-                <th>Fiyat</th>
+                <th>Süre (dk)</th>
+                <th>Fiyat (TL)</th>
                 <th>İşlemler</th>
             </tr>
         </thead>
@@ -23,13 +36,14 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.Id</td>
                     <td>@item.Ad</td>
                     <td>@item.Sure</td>
                     <td>@item.Fiyat TL</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Düzenle</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Sil</a>
+                        <a asp-action="Duzenle" asp-route-id="@item.Id" class="btn btn-info">Düzenle</a>
+                        <form asp-action="Sil" method="post" class="d-inline" asp-route-id="@item.Id"> 
+                            <button type="submit" class="btn btn-danger">Sil</button>
+                        </form>
                     </td>
                 </tr>
             }
