@@ -10,11 +10,25 @@
 <form asp-action="Olustur" method="post">
     @Html.AntiForgeryToken()
     <div class="row g-3">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 <label asp-for="Ad" class="control-label"></label>
                 <input asp-for="Ad" class="form-control" />
                 <span asp-validation-for="Ad" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Sure" class="control-label">Süre (dk)</label>
+                <input asp-for="Sure" class="form-control" />
+                <span asp-validation-for="Sure" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Fiyat" class="control-label">Fiyat (TL)</label>
+                <input asp-for="Fiyat" class="form-control" />
+                <span asp-validation-for="Fiyat" class="text-danger"></span>
             </div>
         </div>
     </div>

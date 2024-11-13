@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BerberKuaforRandevu.Migrations
 {
     [DbContext(typeof(KuaforVeritabani))]
-    [Migration("20241222010945_Yetenek_Tablosuna_Sure_Ve_Fiyat_Ekle")]
+    [Migration("20241222012505_Yetenek_Tablosuna_Sure_Ve_Fiyat_Ekle")]
     partial class Yetenek_Tablosuna_Sure_Ve_Fiyat_Ekle
     {
         /// <inheritdoc />

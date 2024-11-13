@@ -13,7 +13,7 @@ namespace BerberKuaforRandevu.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "Fiyat",
                 table: "Yetenekler",
-                type: "decimal(4,2)",
+                type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
 

@@ -45,7 +45,9 @@ namespace BerberKuaforRandevu.Controllers
             var yetenek = new Yetenek
             {
                 SalonId = salonId,
-                Ad = dto.Ad
+                Ad = dto.Ad,
+                Sure = dto.Sure,
+                Fiyat = dto.Fiyat,
             };
 
             _context.Yetenekler.Add(yetenek);

@@ -15,7 +15,7 @@ namespace BerberKuaforRandevu.Models
         public int Sure { get; set; } 
 
         [Required]
-        [Range(0.0, 999999.99, ErrorMessage = "Fiyat 0 ile 9999.99 arasında olmalıdır.")] 
+        [Range(0.0, 9999.99, ErrorMessage = "Fiyat 0 ile 9999.99 arasında olmalıdır.")] 
         [DataType(DataType.Currency)] 
         public decimal Fiyat { get; set; } 
 
