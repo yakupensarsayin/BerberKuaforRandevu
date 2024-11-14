@@ -29,3 +29,20 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.yetenek-kart {
+    cursor: pointer;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.yetenek-kart:hover {
+    background-color: #e9ecef;
+    transform: scale(1.05);
+}
+
+.yetenek-kart.selected {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}

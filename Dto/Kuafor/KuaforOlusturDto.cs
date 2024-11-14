@@ -25,6 +25,9 @@ namespace BerberKuaforRandevu.Dto.Kuafor
         [DataType(DataType.Password)]
         [Display(Name = "Şifre")]
         public required string Sifre { get; set; }
+
+        public List<int> Yetenekler { get; set; } = [];
+        public List<int> Uzmanliklar { get; set; } = [];
     }
 
 }

@@ -26,13 +26,19 @@ namespace BerberKuaforRandevu.Controllers
         }
 
         [HttpGet]
-        public IActionResult Olustur()
+        public async Task<IActionResult> Olustur()
         {
+            int salonId = await _helper.GetSalonIdForAdminAsync();
+
+            ViewBag.Yetenekler = await _context.Yetenekler
+                .Where(y => y.SalonId == salonId)
+                .ToListAsync();
+
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Olustur(KuaforOlusturDto dto)
+        public async Task<IActionResult> Olustur([FromBody] KuaforOlusturDto dto)
         {
             if (!ModelState.IsValid)
             {
@@ -71,6 +77,43 @@ namespace BerberKuaforRandevu.Controllers
             };
 
             _context.Kuaforler.Add(kuafor);
+            await _context.SaveChangesAsync();
+
+            // Yetenekler ve Uzmanlıklar kontrolü
+            var salonYetenekler = await _context.Yetenekler
+                .Where(y => y.SalonId == salonId).Select(y => y.Id).ToListAsync();
+
+            foreach (var yetenekId in dto.Yetenekler) 
+            { 
+                if (!salonYetenekler.Contains(yetenekId))
+                { 
+                    return BadRequest($"Yetenek ID {yetenekId} bu salona ait değil."); 
+                } 
+                var kuaforYetenek = new KuaforYetenek 
+                { 
+                    KuaforId = kuafor.Id, 
+                    YetenekId = yetenekId 
+                };
+
+                _context.KuaforlerYetenekler.Add(kuaforYetenek);
+            }
+
+            foreach (var uzmanlikId in dto.Uzmanliklar) 
+            {
+                if (!salonYetenekler.Contains(uzmanlikId)) 
+                { 
+                    return BadRequest($"Uzmanlık ID {uzmanlikId} bu salona ait değil.");
+                } 
+                
+                var kuaforUzmanlik = new KuaforUzmanlik 
+                { 
+                    KuaforId = kuafor.Id,
+                    YetenekId = uzmanlikId 
+                }; 
+                
+                _context.KuaforlerUzmanliklar.Add(kuaforUzmanlik); 
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));

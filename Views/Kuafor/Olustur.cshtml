@@ -3,12 +3,17 @@
 
 @{
     ViewBag.Title = "Kuaför Oluştur";
+    var yetenekler = ViewBag.Yetenekler as List<Yetenek>;
 }
 
 <h2>Yeni Kuaför Oluştur</h2>
 <hr />
 
+<h3 class="mt-4">Çalışan Bilgileri</h3>
+
 <form asp-action="Olustur">
+    @Html.AntiForgeryToken()
+
     <div class="row g-3">
         <div class="col-md-6">
             <div class="form-group">
@@ -42,14 +47,131 @@
             </div>
         </div>
     </div>
-
-    <div class="form-group">
-        <input type="submit" value="Oluştur" class="btn btn-primary mt-3" />
-    </div>
 </form>
+
+<h3 class="mt-4">Kuaförün yeteneklerini seç.</h3>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <h4>Yetenekler</h4>
+        <div class="d-flex flex-wrap gap-2" id="yetenekler">
+            @if (yetenekler == null)
+            {
+                <span>Salonunuzda hiçbir yetenek yok. Yetenekler sayfasından yetenek ekleyin.</span>
+            }
+            else 
+            {
+                @foreach (var yetenek in yetenekler)
+                {
+                    <div class="yetenek-kart p-2 border rounded"
+                         data-id="@yetenek.Id"
+                         onclick="yetenekSec(this)">
+                        @yetenek.Ad
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="col-md-6 mt-3 mt-md-0">
+        <h4>Uzmanlıklar</h4>
+        <div class="d-flex flex-wrap gap-2" id="uzmanliklar">
+
+        </div>
+    </div>
+
+    <div class="text-center d-flex justify-content-start mt-3">
+        <button type="button" class="btn btn-primary" id="submitButton">Oluştur</button>
+    </div>
+
+</div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        function yetenekSec(element) {
+            const yetenekId = parseInt(element.getAttribute('data-id'));
+
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                uzmanlikKartiKaldir(yetenekId);
+            } else {
+                element.classList.add('selected');
+                uzmanlikKartiEkle(yetenekId, element.innerText);
+            }
+        }
+
+        function uzmanlikKartiEkle(yetenekId, yetenekAdi) {
+            const container = document.getElementById('uzmanliklar');
+            const uzmanlikElementi = document.createElement('div');
+            uzmanlikElementi.className = 'yetenek-kart p-2 border rounded';
+            uzmanlikElementi.setAttribute('data-id', yetenekId);
+            uzmanlikElementi.innerText = yetenekAdi;
+            uzmanlikElementi.onclick = () => uzmanlikSec(uzmanlikElementi);
+            container.appendChild(uzmanlikElementi);
+        }
+
+        function uzmanlikKartiKaldir(yetenekId) {
+            const container = document.getElementById('uzmanliklar');
+            const uzmanlikElementi = container.querySelector(`div[data-id='${yetenekId}']`);
+            if (uzmanlikElementi) {
+                container.removeChild(uzmanlikElementi);
+            }
+        }
+
+        function uzmanlikSec(element) {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+            } else {
+                element.classList.add('selected');
+            }
+        }
+
+        document.getElementById('submitButton').addEventListener('click', async () => {
+            const ad = document.querySelector('input[name="Ad"]').value;
+            const soyad = document.querySelector('input[name="Soyad"]').value;
+            const email = document.querySelector('input[name="Email"]').value;
+            const sifre = document.querySelector('input[name="Sifre"]').value;
+
+            const yetenekler = [];
+            document.querySelectorAll('#yetenekler .yetenek-kart.selected').forEach(element => {
+                yetenekler.push(parseInt(element.getAttribute('data-id')));
+            });
+
+            const uzmanliklar = [];
+            document.querySelectorAll('#uzmanliklar .yetenek-kart.selected').forEach(element => {
+                uzmanliklar.push(parseInt(element.getAttribute('data-id')));
+            });
+
+            const body = JSON.stringify({
+                Ad: ad,
+                Soyad: soyad,
+                Email: email,
+                Sifre: sifre,
+                Yetenekler: yetenekler,
+                Uzmanliklar: uzmanliklar
+            });
+
+            const response = await fetch('/Kuafor/Olustur', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: body
+            });
+
+            if (response.ok) {
+                window.location.href = '/Kuafor/Index';
+            } else {
+                console.error('Kuaför oluşturulurken hata oluştu.');
+            }
+        });
+
+
+
+    </script>
 }
