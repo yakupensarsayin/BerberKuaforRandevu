@@ -23,6 +23,14 @@ namespace BerberKuaforRandevu.Dto.Kuafor
 
         public string? Sifre { get; set; }
 
+        public IFormFile? Fotograf { get; set; }
+
+        [Required]
+        public TimeSpan MesaiBaslangic { get; set; }
+
+        [Required]
+        public TimeSpan MesaiBitis { get; set; }
+
         public List<int> Yetenekler { get; set; } = [];
         public List<int> Uzmanliklar { get; set; } = [];
     }

@@ -17,6 +17,18 @@
 
     @Html.AntiForgeryToken()
 
+    <div class="d-flex justify-content-center mb-4">
+        <div class="col-md-5 text-center justify-content-center">
+            <label for="photoUpload" class="form-label">Fotoğraf Yükle</label>
+            <input type="file" id="photoUpload" class="form-control" accept="image/*" />
+            <div class="mt-3" id="photoPreviewContainer">
+                <img id="photoPreview" src="@(Url.Action("GetPhoto", "Kuafor", new { id = Model.Id }))" alt="Fotoğraf Önizleme" class="img-fluid" style="max-width: 100%; max-height: 300px; display: block;" />
+            </div>
+            <button type="button" class="btn btn-danger mt-2" id="cancelPhotoButton">Fotoğrafı İptal Et</button>
+        </div>
+    </div>
+
+
     <div class="row g-3">
         <div class="col-md-6">
             <div class="form-group">
@@ -50,6 +62,23 @@
             </div>
         </div>
     </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="MesaiBaslangic" class="control-label">Mesai Başlangıç</label>
+                <input asp-for="MesaiBaslangic" class="form-control" type="time" />
+                <span asp-validation-for="MesaiBaslangic" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="MesaiBitis" class="control-label">Mesai Bitiş</label>
+                <input asp-for="MesaiBitis" class="form-control" type="time" />
+                <span asp-validation-for="MesaiBitis" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
 </form>
 
 <h3 class="mt-4">Kuaförün yeteneklerini seç.</h3>
@@ -68,8 +97,8 @@
                 {
                     <div class="yetenek-kart p-2 border rounded
                         @(mevcutYetenekler.Contains(yetenek.Id) ? "selected" : "")"
-                         data-id="@yetenek.Id"
-                         onclick="yetenekSec(this)">
+                    data-id="@yetenek.Id"
+                    onclick="yetenekSec(this)">
                         @yetenek.Ad
                     </div>
                 }
@@ -80,23 +109,23 @@
     <div class="col-md-6 mt-3 mt-md-0"> 
         <h4>Uzmanlıklar</h4> 
         <div class="d-flex flex-wrap gap-2" id="uzmanliklar"> 
-           @if(yetenekler == null)
-           {
+            @if(yetenekler == null)
+            {
                 <span>Salonunuzda hiçbir yetenek yok. Yetenekler sayfasından yetenek ekleyin.</span>
-           }
-           else 
-           {
+            }
+            else 
+            {
                 @foreach (var yetenek in yetenekler)
                 {
                     if (mevcutUzmanliklar.Contains(yetenek.Id))
                     {
                         <div class="yetenek-kart p-2 border rounded selected"
-                             data-id="@yetenek.Id"
-                             onclick="uzmanlikSec(this)">
+                            data-id="@yetenek.Id"
+                            onclick="uzmanlikSec(this)">
                             @yetenek.Ad
                         </div>
                     }
-                    else 
+                    else if(mevcutYetenekler.Contains(yetenek.Id))
                     {
                         <div class="yetenek-kart p-2 border rounded"
                              data-id="@yetenek.Id"
@@ -120,7 +149,45 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
+
+
     <script>
+
+        window.addEventListener('load', () => {
+            const cancelPhotoButton = document.getElementById('cancelPhotoButton');
+            cancelPhotoButton.style.display = 'none';
+        });
+
+
+        let originalPhoto = document.getElementById('photoPreview').src;
+
+        document.getElementById('photoUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const photoPreview = document.getElementById('photoPreview');
+            const cancelPhotoButton = document.getElementById('cancelPhotoButton');
+
+            reader.onload = function(e) {
+                photoPreview.src = e.target.result;
+                photoPreview.style.display = 'block';
+                cancelPhotoButton.style.display = 'block';
+            }
+
+            reader.readAsDataURL(file);
+        });
+
+
+        document.getElementById('cancelPhotoButton').addEventListener('click', function() {
+            const photoPreview = document.getElementById('photoPreview');
+            const photoUpload = document.getElementById('photoUpload');
+            const cancelPhotoButton = document.getElementById('cancelPhotoButton');
+
+            photoPreview.src = originalPhoto;
+            photoUpload.value = '';
+            cancelPhotoButton.style.display = 'none';
+        });
+
+
         function yetenekSec(element) {
             const yetenekId = parseInt(element.getAttribute('data-id'));
 
@@ -164,6 +231,10 @@
             const soyad = document.querySelector('input[name="Soyad"]').value;
             const email = document.querySelector('input[name="Email"]').value;
             const sifre = document.querySelector('input[name="Sifre"]').value;
+            const mesaiBaslangic = document.querySelector('input[name="MesaiBaslangic"]').value;
+            const mesaiBitis = document.querySelector('input[name="MesaiBitis"]').value;
+            const fileInput = document.getElementById('photoUpload');
+            const file = fileInput.files[0];
 
             const yetenekler = [];
             document.querySelectorAll('#yetenekler .yetenek-kart.selected').forEach(element => {
@@ -175,25 +246,33 @@
                 uzmanliklar.push(parseInt(element.getAttribute('data-id')));
             });
 
-            const kuaforId = document.querySelector('input[name="Id"]').value;
-
-            const body = JSON.stringify({
-                Id: kuaforId,
-                Ad: ad,
-                Soyad: soyad,
-                Email: email,
-                Sifre: sifre || undefined,
-                Yetenekler: yetenekler,
-                Uzmanliklar: uzmanliklar
+            const formData = new FormData();
+            formData.append('Ad', ad);
+            formData.append('Soyad', soyad);
+            formData.append('Email', email);
+            if (sifre) {
+                formData.append('Sifre', sifre);
+            }
+            formData.append('MesaiBaslangic', mesaiBaslangic);
+            formData.append('MesaiBitis', mesaiBitis);
+            if (file) {
+                formData.append('Fotograf', file);
+            }
+            yetenekler.forEach((yetenek, index) => {
+                formData.append(`Yetenekler[${index}]`, yetenek);
             });
+            uzmanliklar.forEach((uzmanlik, index) => {
+                formData.append(`Uzmanliklar[${index}]`, uzmanlik);
+            });
+
+            const kuaforId = document.querySelector('input[name="Id"]').value;
 
             const response = await fetch(`/Kuafor/Duzenle/${kuaforId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                 },
-                body: body
+                body: formData
             });
 
             if (response.ok) {
@@ -202,5 +281,6 @@
                 console.error('Kuaför güncellenirken hata oluştu.');
             }
         });
+
     </script>
 }

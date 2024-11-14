@@ -26,6 +26,15 @@ namespace BerberKuaforRandevu.Dto.Kuafor
         [Display(Name = "Şifre")]
         public required string Sifre { get; set; }
 
+        [Required]
+        public required IFormFile Fotograf { get; set; }
+
+        [Required]
+        public TimeSpan MesaiBaslangic { get; set; }
+
+        [Required]
+        public TimeSpan MesaiBitis { get; set; }
+
         public List<int> Yetenekler { get; set; } = [];
         public List<int> Uzmanliklar { get; set; } = [];
     }

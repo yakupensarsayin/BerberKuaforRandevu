@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace BerberKuaforRandevu.Controllers
 {
@@ -39,11 +40,11 @@ namespace BerberKuaforRandevu.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Olustur([FromBody] KuaforOlusturDto dto)
+        public async Task<IActionResult> Olustur(KuaforOlusturDto dto)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || dto.Fotograf.Length <= 0)
             {
-                return View(dto);
+                return BadRequest();
             }
 
             int salonId = await _helper.GetSalonIdForAdminAsync();
@@ -71,10 +72,21 @@ namespace BerberKuaforRandevu.Controllers
             // Kuaförün rolünü atamayı unutmayalım
             await _userManager.AddToRoleAsync(kullanici, Roller.Kuafor);
 
+            byte[] fotoData;
+
+            using (var memoryStream = new MemoryStream())
+            { 
+                await dto.Fotograf.CopyToAsync(memoryStream);
+                fotoData = memoryStream.ToArray();
+            }
+
             var kuafor = new Kuafor
             {
                 KullaniciId = kullanici.Id,
-                SalonId = salonId
+                SalonId = salonId,
+                Fotograf = fotoData,
+                MesaiBaslangic = dto.MesaiBaslangic,
+                MesaiBitis = dto.MesaiBitis
             };
 
             _context.Kuaforler.Add(kuafor);
@@ -119,6 +131,8 @@ namespace BerberKuaforRandevu.Controllers
                 Ad = kuafor.Kullanici.Ad,
                 Soyad = kuafor.Kullanici.Soyad,
                 Email = kuafor.Kullanici.Email!,
+                MesaiBitis = kuafor.MesaiBitis,
+                MesaiBaslangic = kuafor.MesaiBaslangic,
                 Yetenekler = kuafor.KuaforYetenekler.Select(ky => ky.YetenekId).ToList(),
                 Uzmanliklar = kuafor.KuaforUzmanliklar.Select(ku => ku.YetenekId).ToList()
             };
@@ -128,11 +142,11 @@ namespace BerberKuaforRandevu.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Duzenle([FromRoute] int id, [FromBody] KuaforDuzenleDto dto)
+        public async Task<IActionResult> Duzenle([FromRoute] int id, KuaforDuzenleDto dto)
         {
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return BadRequest();
             }
 
             int salonId = await _helper.GetSalonIdForAdminAsync();
@@ -151,6 +165,17 @@ namespace BerberKuaforRandevu.Controllers
             if (updateResponse != null)
             {
                 return updateResponse;
+            }
+            kuafor.MesaiBaslangic = dto.MesaiBaslangic;
+            kuafor.MesaiBitis = dto.MesaiBitis;
+
+            if (dto.Fotograf != null && dto.Fotograf.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await dto.Fotograf.CopyToAsync(memoryStream);
+                    kuafor.Fotograf = memoryStream.ToArray();
+                }
             }
 
             // Yetenekler ve Uzmanlıklar kontrolü ve ekleme
@@ -183,6 +208,17 @@ namespace BerberKuaforRandevu.Controllers
             _context.Kuaforler.Remove(kuafor);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult GetPhoto(int id)
+        {
+            var kuafor = _context.Kuaforler.FirstOrDefault(k => k.Id == id);
+            if (kuafor?.Fotograf != null)
+            {
+                return File(kuafor.Fotograf, "image/jpeg");
+            }
+            return NotFound();
         }
 
         private async Task<List<Kuafor>> GetKuaforlerBySalonIdAsync(int salonId)
