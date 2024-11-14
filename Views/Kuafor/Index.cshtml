@@ -29,11 +29,90 @@
                     <td>@string.Join(", ", kuafor.KuaforYetenekler.Select(ky => ky.Yetenek.Ad))</td>
                     <td>@string.Join(", ", kuafor.KuaforUzmanliklar.Select(ku => ku.Yetenek.Ad))</td>
                     <td>
-                        <a asp-action="Duzenle" class="btn btn-warning">Düzenle</a>
-                        <a asp-action="Sil" class="btn btn-danger">Sil</a>
+                        <a asp-action="Duzenle" asp-route-id="@kuafor.Id" class="btn btn-warning">Düzenle</a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#silModal" data-id="@kuafor.Id" data-name="@kuafor.Kullanici.Ad @kuafor.Kullanici.Soyad">Sil</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+<!-- Silme Modal -->
+<div class="modal fade" id="silModal" tabindex="-1" aria-labelledby="silModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="silModalLabel">Kuaför silme işlemi.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="silModalBody"></p>
+                <div class="mb-3">
+                    <label for="confirmText" class="form-label">Eminseniz aşağıdaki kutucuğa <strong>sil</strong> yazınız.</label>
+                    <input type="text" id="confirmText" class="form-control" oninput="checkConfirmText()" />
+                </div>
+                <div class="alert alert-danger d-none" id="confirmError">Lütfen "sil" yazınız.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton" disabled>Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var silModal = document.getElementById('silModal');
+            silModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget; 
+                var kuaforId = button.getAttribute('data-id'); 
+                var kuaforName = button.getAttribute('data-name');
+
+                var modalBody = silModal.querySelector('.modal-body p');
+                modalBody.textContent = kuaforName + ' isimli kuaför silinecektir, emin misiniz?';
+
+                var confirmDeleteButton = document.getElementById('confirmDeleteButton');
+                confirmDeleteButton.setAttribute('data-id', kuaforId);
+            });
+
+            var confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            confirmDeleteButton.addEventListener('click', function() {
+                var kuaforId = this.getAttribute('data-id');
+                var confirmText = document.getElementById('confirmText').value;
+
+                if (confirmText.toLowerCase() === 'sil') {
+                    fetch(`/Kuafor/Sil/${kuaforId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            console.error('Silme işlemi başarısız.');
+                        }
+                    });
+                } else {
+                    var confirmError = document.getElementById('confirmError');
+                    confirmError.classList.remove('d-none');
+                }
+            });
+        });
+
+        function checkConfirmText() {
+            var confirmText = document.getElementById('confirmText').value;
+            var confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            if (confirmText.toLowerCase() === 'sil') {
+                confirmDeleteButton.disabled = false;
+                document.getElementById('confirmError').classList.add('d-none');
+            } else {
+                confirmDeleteButton.disabled = true;
+            }
+        }
+    </script>
+}
