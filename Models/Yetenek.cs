@@ -25,5 +25,6 @@ namespace BerberKuaforRandevu.Models
 
         public List<KuaforYetenek> KuaforYetenekler { get; set; } = [];
         public List<KuaforUzmanlik> KuaforUzmanliklar { get; set; } = [];
+        public List<Randevu> Randevular {  get; set; } = [];
     }
 }

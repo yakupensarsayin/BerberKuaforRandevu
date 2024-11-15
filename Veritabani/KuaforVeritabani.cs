@@ -13,6 +13,7 @@ namespace BerberKuaforRandevu.Veritabani
         public DbSet<KuaforUzmanlik> KuaforlerUzmanliklar { get; set; }
         public DbSet<Salon> Salonlar { get; set; }
         public DbSet<SalonTuru> SalonTurleri { get; set; }
+        public DbSet<Randevu> Randevular { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         { 
