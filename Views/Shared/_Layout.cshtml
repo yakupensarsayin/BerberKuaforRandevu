@@ -39,6 +39,15 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Randevu" asp-action="Index">Randevu Al</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Randevu" asp-action="Randevularim">Randevularım</a>
+                                </li>
+                            }
+                            else if (User.IsInRole(Roller.Kuafor))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Randevu" asp-action="RandevulariYonet">Randevu Onayla</a>
+                                </li>
                             }
                         }
                         <li class="nav-item ms-auto">
