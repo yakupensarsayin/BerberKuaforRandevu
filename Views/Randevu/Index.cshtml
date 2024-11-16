@@ -1,0 +1,432 @@
+﻿@{
+    ViewBag.Title = "Randevu Al";
+    var salonlar = ViewBag.Salonlar as List<Salon>;
+}
+
+<h2>Randevu Al</h2>
+<hr />
+
+<div class="form-row mb-3">
+    <div class="col-md-6">
+        <label for="salonDropdown">Salon Seçin:</label>
+        <select id="salonDropdown" class="form-control">
+            @if (salonlar != null && salonlar.Count > 0)
+            {
+                <option value="">Salon Seçin</option>
+                @foreach (var salon in salonlar)
+                {
+                    <option value="@salon.Id">@salon.Ad</option>
+                }
+            } else {
+                <option>Salon bulunmamaktadır.</option>
+            }
+            
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label for="yetenekDropdown">Yetenek Seçin:</label>
+        <select id="yetenekDropdown" class="form-control">
+            <option value="">Yetenek Seçin</option>
+        </select>
+        <div id="loading" class="spinner-border text-primary" role="status" style="display: none;">
+            <span class="sr-only">Yükleniyor...</span>
+        </div>
+    </div>
+</div>
+
+<div class="form-row mb-3" id="yetenekDetails" style="display: none;">
+    <div class="col-md-3">
+        <label for="sure">Süre:</label>
+        <input type="text" id="sure" class="form-control" readonly disabled />
+    </div>
+    <div class="col-md-3">
+        <label for="ucret">Ücret:</label>
+        <input type="text" id="ucret" class="form-control" readonly disabled />
+    </div>
+</div>
+
+<div class="form-row mb-3">
+    <div class="col-md-6">
+        <label for="kuaforDropdown">Kuaför Seçin:</label>
+        <select id="kuaforDropdown" class="form-control">
+            <option value="">Kuaför Seçin</option>
+        </select>
+    </div>
+</div>
+
+<div class="form-row mb-3">
+    <div class="col-md-6">
+        <label for="tarih">Tarih Seçin:</label>
+        <input type="date" id="tarih" class="form-control" />
+    </div>
+</div>
+
+<div class="form-row mb-3">
+    <div class="col-md-6">
+        <button id="ilerleButton" class="btn btn-primary" disabled>İlerle</button>
+    </div>
+</div>
+
+<div id="calendar"></div>
+
+<div class="form-row mb-3 mt-3">
+    <div class="col-md-6">
+        <button id="randevuAlButton" class="btn btn-primary" disabled>Randevu Al</button>
+    </div>
+</div>
+
+<div class="modal fade" id="randevuModal" tabindex="-1" aria-labelledby="randevuModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="randevuModalLabel">Randevu Detayları</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="randevuForm">
+                    <input type="text" id="hiddenTarih" hidden readonly/>
+                    <div class="mb-3">
+                        <label for="modalTarih" class="form-label">Tarih ve Saat:</label>
+                        <input type="text" id="modalTarih" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalIslem" class="form-label">İşlem:</label>
+                        <input type="text" id="modalIslem" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalUcret" class="form-label">Ücret:</label>
+                        <input type="text" id="modalUcret" class="form-control" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deleteButton" style="display: none;">Sil</button>
+                <button type="button" class="btn btn-primary" id="saveButton">Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const salonDropdown = document.getElementById("salonDropdown");
+            const yetenekDropdown = document.getElementById("yetenekDropdown");
+            const kuaforDropdown = document.getElementById("kuaforDropdown");
+            const tarihInput = document.getElementById("tarih");
+            const ilerleButton = document.getElementById("ilerleButton");
+            const loading = document.getElementById("loading");
+            const randevuButton = document.getElementById('randevuAlButton');
+
+            let selectedEvent = null;
+
+            // Dropdown'ları başlangıçta devre dışı bırak
+            yetenekDropdown.disabled = true;
+            kuaforDropdown.disabled = true;
+            tarihInput.disabled = true;
+            ilerleButton.disabled = true;
+            randevuButton.disabled = true;
+
+            // Salonlar yüklendiğinde
+            salonDropdown.addEventListener("change", async () => {
+                const salonId = salonDropdown.value;
+
+                // Salon seçilmediyse diğerlerini devre dışı bırak
+                if (!salonId) {
+                    yetenekDropdown.disabled = true;
+                    kuaforDropdown.disabled = true;
+                    tarihInput.disabled = true;
+                    ilerleButton.disabled = true;
+                    return;
+                }
+
+                // Yetenekleri getir
+                loading.style.display = "inline-block";
+                try {
+                    const response = await fetch(`/api/general/yetenekler?salonId=${salonId}`);
+                    const yetenekler = await response.json();
+
+                    // Yetenek dropdown'ını doldur
+                    yetenekDropdown.innerHTML = `<option value="">Yetenek Seçin</option>`;
+                    yetenekler.forEach(y => {
+                        yetenekDropdown.innerHTML += `<option value="${y.id}" data-sure="${y.sure}" data-ucret="${y.fiyat}">${y.ad}</option>`;
+                    });
+
+                    yetenekDropdown.disabled = false;
+                } catch (error) {
+                    console.error("Yetenekler yüklenemedi:", error);
+                } finally {
+                    loading.style.display = "none";
+                }
+            });
+
+            // Yetenek seçildiğinde
+            yetenekDropdown.addEventListener("change", async () => {
+                const salonId = salonDropdown.value;
+                const yetenekId = yetenekDropdown.value;
+
+                if (!yetenekId) {
+                    kuaforDropdown.disabled = true;
+                    tarihInput.disabled = true;
+                    ilerleButton.disabled = true;
+                    return;
+                }
+
+                // Kuaförleri getir
+                loading.style.display = "inline-block";
+                try {
+                    const response = await fetch(`/api/general/kuaforler?salonId=${salonId}&yetenekId=${yetenekId}`);
+                    const kuaforler = await response.json();
+
+                    // Kuaför dropdown'ını doldur
+                    kuaforDropdown.innerHTML = `<option value="">Kuaför Seçin</option>`;
+                    kuaforler.forEach(k => {
+                        const uzmanlik = k.uzmanlik === "yes" ? " (Uzman)" : " (Normal)";
+                        kuaforDropdown.innerHTML += `<option value="${k.id}" data-mesai-baslangic="${k.mesaiBaslangic}" data-mesai-bitis="${k.mesaiBitis}">${k.ad} ${k.soyad}${uzmanlik}</option>`;
+                    });
+
+                    kuaforDropdown.disabled = false;
+                } catch (error) {
+                    console.error("Kuaförler yüklenemedi:", error);
+                } finally {
+                    loading.style.display = "none";
+                }
+            });
+
+            // Kuaför seçildiğinde
+            kuaforDropdown.addEventListener("change", () => {
+                const kuaforId = kuaforDropdown.value;
+
+                if (!kuaforId) {
+                    tarihInput.disabled = true;
+                    ilerleButton.disabled = true;
+                    return;
+                }
+
+                // Tarih input'unu etkinleştir
+                tarihInput.disabled = false;
+            });
+
+            // Tarih seçildiğinde
+            tarihInput.addEventListener("input", () => {
+                const kuaforId = kuaforDropdown.value;
+                const tarih = tarihInput.value;
+
+                if (!tarih || !kuaforId) {
+                    ilerleButton.disabled = true;
+                    return;
+                }
+
+                const today = new Date();
+                const selectedDate = new Date(tarih);
+                today.setHours(0, 0, 0);
+
+                if (selectedDate < today) {
+                    alert("Geçmişten gün seçemezsiniz.");
+                    ilerleButton.disabled = true;
+                } else {
+                    ilerleButton.disabled = false;
+                }
+
+                // Mesai kontrolü
+                // const mesaiBaslangic = kuaforDropdown.selectedOptions[0].getAttribute("data-mesai-baslangic");
+                // const mesaiBitis = kuaforDropdown.selectedOptions[0].getAttribute("data-mesai-bitis");
+                // const tarihSaat = selectedDate.getHours();
+
+                // if (tarihSaat < parseInt(mesaiBaslangic) || tarihSaat >= parseInt(mesaiBitis)) {
+                //     alert("Seçilen saat kuaförün mesai saatleri dışında.");
+                //     ilerleButton.disabled = true;
+                // } else {
+                //     ilerleButton.disabled = false;
+                // }
+            });
+
+            ilerleButton.addEventListener("click", async () => {
+                const kuaforId = kuaforDropdown.value;
+                const yetenekId = yetenekDropdown.value;
+                const yetenekSure = parseInt(yetenekDropdown.selectedOptions[0].getAttribute("data-sure"));
+                const selectedDate = tarihInput.value;
+
+                if (!kuaforId || !selectedDate || !yetenekId) {
+                    alert("Lütfen tüm seçimleri yapınız.");
+                    return;
+                }
+
+                const calendarEl = document.getElementById("calendar");
+                let calendar;
+
+                try {
+                    // Randevuları getir
+                    const response = await fetch(`/api/general/kuaforler/randevular?kuaforId=${kuaforId}&date=${selectedDate}`);
+                    const randevular = await response.json();
+
+                    // Mesai saatlerini al
+                    const mesaiBaslangic = kuaforDropdown.selectedOptions[0].getAttribute("data-mesai-baslangic");
+                    const mesaiBitis = kuaforDropdown.selectedOptions[0].getAttribute("data-mesai-bitis");
+
+                    // Takvimi oluştur
+                    if (calendar) calendar.destroy(); // Eski takvimi yok et
+
+                    const yetenekAdi = yetenekDropdown.selectedOptions[0].text;
+                    const ucret = yetenekDropdown.selectedOptions[0].getAttribute("data-ucret");
+
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'timeGridDay',
+                        initialDate: selectedDate,
+                        headerToolbar: false,
+                        editable: false,
+                        selectable: true,
+                        allDaySlot: false,
+                        slotDuration: `00:20:00`, // Yetenek süresi kadar step
+                        slotMinTime: `${mesaiBaslangic}:00`,
+                        slotMaxTime: `${mesaiBitis}:00`,
+                        height: 'auto',
+                        events: randevular.map(r => ({
+                            title: r.title,  // İşlem adı
+                            start: r.start,  // Başlangıç tarihi
+                            end: r.end,      // Bitiş tarihi
+                            color: r.onayli ? 'green' : 'gray',  // Onaylı ise yeşil, değilse gri
+                            extendedProps: {
+                                onayli: r.onayli,  // Randevunun onay durumu
+                                randevuId: r.id    // Randevu id'si, ihtiyaca göre kullanılabilir
+                            }
+                        })),
+                        select: (info) => {
+                            if (selectedEvent) {
+                                alert("Daha önce bir seçim yaptınız. Yeni bir seçim yapamazsınız.");
+                                return;
+                            }
+
+                            const startDate = new Date(info.start);
+                            const endDate = new Date(startDate.getTime() + yetenekSure * 60 * 1000); // Yetenek süresini ekle
+
+                            const modalTarih = document.getElementById("modalTarih");
+                            const modalIslem = document.getElementById("modalIslem");
+                            const modalUcret = document.getElementById("modalUcret");
+                            const deleteButton = document.getElementById("deleteButton");
+                            const saveButton = document.getElementById("saveButton");
+
+                            modalTarih.value = `${startDate.toLocaleString("tr-TR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}`;
+                            modalIslem.value = yetenekAdi;
+                            modalUcret.value = `${ucret} TL`;
+                            deleteButton.style.display = "none";
+                            saveButton.style.display = "inline-block";
+
+                            // Modal'ı aç
+                            const modal = new bootstrap.Modal(document.getElementById("randevuModal"));
+                            modal.show();
+
+                            // Kaydet butonuna basıldığında
+                            saveButton.onclick = function () {
+                                const event = {
+                                    id: Date.now().toString(),
+                                    title: yetenekAdi,
+                                    start: startDate,
+                                    end: endDate,
+                                    backgroundColor: "blue",
+                                    borderColor: "blue",
+                                };
+                                calendar.addEvent(event);
+                                selectedEvent = event;
+                                randevuButton.disabled = false;
+                                document.getElementById('hiddenTarih').value = info.start;
+                                modal.hide();
+                            };
+                        },
+                        visibleRange: {
+                            start: selectedDate,
+                            end: selectedDate
+                        },
+                        eventClick: (info) => {
+                            if (selectedEvent && info.event.id === selectedEvent.id) {
+                                const modalTarih = document.getElementById("modalTarih");
+                                const modalIslem = document.getElementById("modalIslem");
+                                const modalUcret = document.getElementById("modalUcret");
+                                const deleteButton = document.getElementById("deleteButton");
+                                const saveButton = document.getElementById("saveButton");
+
+                                modalTarih.text = `${new Date(info.event.start).toLocaleString("tr-TR", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}`;
+                                modalIslem.value = info.event.title;
+                                modalUcret.value = `${ucret} TL`;
+                                deleteButton.style.display = "inline-block";
+                                saveButton.style.display = "none";
+
+                                // Modal'ı aç
+                                const modal = new bootstrap.Modal(document.getElementById("randevuModal"));
+                                modal.show();
+
+                                // Sil butonuna basıldığında
+                                deleteButton.onclick = function () {
+                                    info.event.remove();
+                                    selectedEvent = null;
+                                    randevuButton.disabled = true;
+                                    modal.hide();
+                                };
+                            }
+                        },
+                    });
+
+                    calendar.render();
+                } catch (error) {
+                    console.error("Randevular yüklenemedi:", error);
+                }
+            });
+
+            randevuButton.addEventListener("click", async () => {
+                const kuaforId = kuaforDropdown.value;
+                const yetenekId = yetenekDropdown.value;
+                const modalTarih = document.getElementById('hiddenTarih').value;
+                const startDate = new Date(modalTarih);
+                const ucret = parseFloat(yetenekDropdown.selectedOptions[0].getAttribute("data-ucret"));
+
+                if (!kuaforId || !yetenekId || !startDate) {
+                    alert("Lütfen tüm seçimleri yapınız.");
+                    return;
+                }
+
+                const randevuData = {
+                    KuaforId: parseInt(kuaforId),
+                    YetenekId: parseInt(yetenekId),
+                    BaslangicTarihi: startDate,
+                    Ucret: ucret,
+                };
+
+                try {
+                    const response = await fetch('/api/general/randevuAl', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(randevuData),
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert(`Randevunuz başarıyla alınmıştır. Randevu ID: ${result.RandevuId}`);
+                        modal.hide();
+                    } else {
+                        const error = await response.json();
+                        console.error("Randevu alma hatası:", error);
+                        alert("Randevu alma başarısız oldu. Lütfen tekrar deneyin.");
+                    }
+                } catch (err) {
+                    console.error("Randevu alma sırasında bir hata oluştu:", err);
+                    alert("Randevu alma başarısız oldu. Lütfen tekrar deneyin.");
+                }
+            });
+        });
+
+    </script>
+}

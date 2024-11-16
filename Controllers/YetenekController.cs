@@ -6,7 +6,6 @@ using BerberKuaforRandevu.Yardimci;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Versioning;
 
 namespace BerberKuaforRandevu.Controllers
 {

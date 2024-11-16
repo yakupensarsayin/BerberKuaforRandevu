@@ -9,7 +9,8 @@
         public Yetenek Yetenek { get; set; } = null!;
         public required string KullaniciId { get; set; }
         public Kullanici Kullanici { get; set; } = null!;
-        public required DateTime Tarih { get; set; }
+        public required DateTime BaslangicTarihi { get; set; }
+        public required DateTime BitisTarihi { get; set; }
         public bool Onayli { get; set; } = false;
     }
 

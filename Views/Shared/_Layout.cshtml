@@ -34,6 +34,12 @@
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Yetenek" asp-action="Index">Yetenek İşlemleri</a>
                                 </li>
                             }
+                            else if (User.IsInRole(Roller.Musteri))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Randevu" asp-action="Index">Randevu Al</a>
+                                </li>
+                            }
                         }
                         <li class="nav-item ms-auto">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
@@ -57,6 +63,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/fullcalendar/dist/index.global.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
