@@ -76,6 +76,21 @@ namespace BerberKuaforRandevu.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = Roller.Kuafor)]
+        public async Task<IActionResult> KuaforOlarakRandevularim()
+        {
+            Kuafor kuafor = await GetCurrentKuafor();
+
+            List<Randevu>? randevu = await _context.Randevular
+                .Where(r => r.KuaforId == kuafor.Id && r.Onayli == true && r.BaslangicTarihi >= DateTime.Now)
+                .Include(r => r.Kullanici)
+                .Include(r => r.Yetenek)
+                .OrderBy(r => r.BaslangicTarihi)
+                .ToListAsync();
+
+            return View(randevu);
+        }
+
         private async Task<Kuafor> GetCurrentKuafor()
         {
             string email = User.Identity!.Name!;
