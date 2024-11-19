@@ -19,6 +19,8 @@ namespace BerberKuaforRandevu.Models
         public SalonTuru SalonTuru { get; set; } = null!;
 
         public List<Kuafor> Kuaforler { get; set; } = [];
+
+        public string? FotografYolu { get; set; }
     }
 
 }
