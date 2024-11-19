@@ -1,0 +1,72 @@
+﻿<div class="container mt-5">
+    <h2 class="text-center">Kuaför Yetenek Raporu</h2>
+    <select id="kuaforSelect" class="form-control" onchange="fetchRandevular()">
+        <option value="">Kuaför seçin</option>
+        @foreach (var kuafor in Model)
+        {
+            <option value="@kuafor.Id">@kuafor.Kullanici.Ad @kuafor.Kullanici.Soyad</option>
+        }
+    </select>
+    <div class="d-flex justify-content-center">
+        <canvas id="yetenekChart" style="max-width: 500px; max-height: 500px;" class="mt-3"></canvas>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Dinamik renk oluşturma fonksiyonu
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    // Global olarak yetenekChart değişkeni tanımla
+    var yetenekChart;
+
+    // Kuaför seçildiğinde randevuları fetch etme ve Chart.js'yi güncelleme fonksiyonu
+    function fetchRandevular() {
+        var kuaforId = document.getElementById('kuaforSelect').value;
+        if (!kuaforId) return;
+
+        fetch(`/KuaforYetenekRaporu?kuaforId=${kuaforId}`)
+            .then(response => response.json())
+            .then(data => {
+                var labels = data.map(r => r.yetenek);
+                var countData = data.map(r => r.count);
+                var colors = labels.map(() => getRandomColor());
+
+                var ctx = document.getElementById('yetenekChart').getContext('2d');
+
+                // Eğer yetenekChart varsa, önceki grafiği yok et
+                if (yetenekChart) {
+                    yetenekChart.destroy();
+                }
+
+                // Yeni grafik oluştur
+                yetenekChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: countData,
+                            backgroundColor: colors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Hata:', error));
+    }
+</script>
