@@ -14,5 +14,21 @@ namespace BerberKuaforRandevu.Controllers
 
             return View();
         }
+
+        public async Task<IActionResult> Magaza([FromRoute] int id)
+        {
+            var salon = await _context.Salonlar
+                .Include(salon => salon.Kuaforler)
+                    .ThenInclude(kuafor => kuafor.Kullanici)
+                .Include(salon => salon.Kuaforler)
+                    .ThenInclude(kuafor => kuafor.KuaforYetenekler)
+                    .ThenInclude(ky => ky.Yetenek)
+                .Include(salon => salon.Kuaforler)
+                    .ThenInclude(kuafor => kuafor.KuaforUzmanliklar)
+                    .ThenInclude(ku => ku.Yetenek)
+                .FirstOrDefaultAsync(salon => salon.Id == id);
+
+            return View(salon);
+        }
     }
 }

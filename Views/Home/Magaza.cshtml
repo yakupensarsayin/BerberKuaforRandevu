@@ -1,0 +1,48 @@
+﻿@model Salon
+
+<div class="container mt-5">
+    <!-- Salon Adı ve Fotoğrafı -->
+    <div class="text-center">
+        <h1 class="text-gradient">@Model.Ad</h1>
+        <img src="~/@Model.FotografYolu" class="img-fluid mt-3 mb-5" alt="@Model.Ad" style="max-width: 600px; height: auto;">
+    </div>
+
+    <!-- Kuaförlerimiz Bölümü -->
+    <div class="text-center mt-5">
+        <h2 class="text-gradient">Kuaförlerimiz</h2>
+    </div>
+    <div class="row mt-4">
+        @foreach (var kuafor in Model.Kuaforler)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow text-center">
+                    @{
+                        var base64 = kuafor.Fotograf != null ? Convert.ToBase64String(kuafor.Fotograf) : null;
+                        var imgSrc = base64 != null ? $"data:image/jpeg;base64,{base64}" : "~/path/to/default/image.jpg";
+                    }
+                    <img src="@imgSrc" class="card-img-top" alt="@kuafor.Kullanici.Ad" style="width: 100%; height: 200px; object-fit: contain; object-position: center;">
+                    <div class="card-body">
+                        <h5 class="card-title">@kuafor.Kullanici.Ad @kuafor.Kullanici.Soyad</h5>
+                        <ul class="card-text"> 
+                            <li>Uzmanlıklar: @string.Join(", ", kuafor.KuaforUzmanliklar.Select(u => u.Yetenek.Ad))</li> 
+                            <li>Yetenekler: @string.Join(", ", kuafor.KuaforYetenekler.Select(y => y.Yetenek.Ad))</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        transition: all 0.3s ease-in-out;
+    }
+</style>
