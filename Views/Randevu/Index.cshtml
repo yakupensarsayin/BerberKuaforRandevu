@@ -414,16 +414,14 @@
 
                     if (response.ok) {
                         const result = await response.json();
-                        alert(`Randevunuz başarıyla alınmıştır. Randevu ID: ${result.RandevuId}`);
+                        alert(`Randevunuz başarıyla alınmıştır.`);
                         modal.hide();
                     } else {
                         const error = await response.json();
                         console.error("Randevu alma hatası:", error);
-                        alert("Randevu alma başarısız oldu. Lütfen tekrar deneyin.");
                     }
                 } catch (err) {
                     console.error("Randevu alma sırasında bir hata oluştu:", err);
-                    alert("Randevu alma başarısız oldu. Lütfen tekrar deneyin.");
                 }
             });
         });

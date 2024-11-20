@@ -1,8 +1,125 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa";
+    var salonlar = ViewBag.Salonlar as List<Salon>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="text-gradient">Barberia</h1>
+        <p>Tarzınızı bizimle keşfedin! Bizi neden tercih etmeniz gerektiğini öğrenin.</p>
+    </div>
+
+    <!-- Neden Bizi Tercih Etmelisiniz? Bölümü -->
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4 d-flex">
+            <div class="card shadow text-center flex-fill">
+                <div class="card-body">
+                    <span class="material-icons md-48 text-primary mb-3">content_cut</span>
+                    <h5 class="card-title">Profesyonel Stilistler</h5>
+                    <p class="card-text">Alanında uzman ekibimiz, her seferinde mükemmel bir tarz sunar.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 d-flex">
+            <div class="card shadow text-center flex-fill">
+                <div class="card-body">
+                    <span class="material-icons md-48 text-warning mb-3">schedule</span>
+                    <h5 class="card-title">Esnek Çalışma Saatleri</h5>
+                    <p class="card-text">İhtiyacınız olduğunda açık, uygun randevu seçenekleriyle hizmetinizdeyiz.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 d-flex">
+            <div class="card shadow text-center flex-fill">
+                <div class="card-body">
+                    <span class="material-icons md-48 text-success mb-3">spa</span>
+                    <h5 class="card-title">Rahatlatıcı Ortam</h5>
+                    <p class="card-text">Güzellik deneyiminizi huzurlu ve samimi bir ortamda yaşayın.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4 d-flex">
+            <div class="card shadow text-center flex-fill">
+                <div class="card-body">
+                    <span class="material-icons md-48 text-info mb-3">diamond</span>
+                    <h5 class="card-title">Kaliteli Ürünler</h5>
+                    <p class="card-text">Sadece premium ürünler kullanarak saçlarınız ve cildiniz için en iyisini sunuyoruz.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 d-flex">
+            <div class="card shadow text-center flex-fill">
+                <div class="card-body">
+                    <span class="material-icons md-48 text-danger mb-3">favorite</span>
+                    <h5 class="card-title">Müşteri Memnuniyeti</h5>
+                    <p class="card-text">Mutluluğunuz önceliğimizdir. Eşsiz hizmet kalitesini deneyimleyin.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 d-flex">
+            <div class="card shadow text-center flex-fill">
+                <div class="card-body">
+                    <span class="material-icons md-48 text-warning mb-3">star</span>
+                    <h5 class="card-title">Ödüllü Hizmet</h5>
+                    <p class="card-text">Mükemmellik için tanınan, ödüllü hizmetimizi sizlere sunuyoruz.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mağazalarımız Bölümü -->
+    <div class="text-center mt-5">
+        <h2 class="text-gradient">Mağazalarımız</h2>
+        <p>Size en yakın lokasyonu bulun ve eşsiz hizmetimizi deneyimleyin.</p>
+    </div>
+    <div class="row" id="store-cards">
+        @{
+            if (salonlar == null)
+            {
+                <span>Salon bulunamadı.</span>
+            }
+            else 
+            {
+                @foreach (var store in salonlar)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow">
+                            <img src="@store.FotografYolu" class="card-img-top" alt="@store.Ad" style="width: 100%; height: 200px; object-fit: contain; object-position: center;">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">@store.Ad</h5>
+                                <a class="btn btn-primary text-light" asp-area="" asp-controller="Home" asp-action="Magaza" asp-route-id="@store.Id">Mağazayı görüntüle</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
 </div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .material-icons {
+        font-size: 48px;
+    }
+
+    .md-48 {
+        font-size: 48px;
+    }
+</style>
+
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

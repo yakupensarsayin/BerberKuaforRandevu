@@ -1,11 +1,17 @@
+using BerberKuaforRandevu.Veritabani;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BerberKuaforRandevu.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(KuaforVeritabani context) : Controller
     {
-        public IActionResult Index()
+        private readonly KuaforVeritabani _context = context;
+        public async Task<IActionResult> Index()
         {
+            ViewBag.Salonlar = await _context.Salonlar
+                .ToListAsync();
+
             return View();
         }
     }
