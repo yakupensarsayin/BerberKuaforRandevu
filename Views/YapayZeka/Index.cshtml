@@ -1,0 +1,24 @@
+﻿<div class="container mt-5">
+    <h2>Fotoğraf Yükle</h2>
+    <form asp-controller="YapayZeka" asp-action="Index" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="fotograf">Fotoğraf Seç:</label>
+            <input type="file" class="form-control-file" id="fotograf" name="fotograf" />
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Yükle</button>
+    </form>
+</div>
+
+@{
+    if (!string.IsNullOrEmpty(ViewBag.ApiResponse))
+    {
+        <span>@ViewBag.ApiResponse</span>
+    }
+}
+
+<style>
+    .container {
+        max-width: 600px;
+        margin-top: 50px;
+    }
+</style>
